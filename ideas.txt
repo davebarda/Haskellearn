@@ -1,0 +1,19 @@
+Michael Werman's list
+-----------------------
+lazy evaluation - fold for online classification?
+pattern matching - dictionary receives name of learner and returns functions
+higher order functions - dictionary that returns the learner by string
+new types -
+derived - derived Show
+lambda functions - V
+functors - implement fmap to classify a list of examples
+applicative -
+monoids - data structure for what was learnt
+
+
+Our list
+-----------------------
+Class inheritance - Classifier -> Online Learner/Offline Learner
+
+KNN + CSV parser:
+https://www.reddit.com/r/haskell/comments/27tcvz/knearest_neighbors_in_haskell_is_elegant_but_slow/
