@@ -2,7 +2,7 @@ import Data.List
 import Data.Ord
 
 --
-data Classifier = Classifier ClassifierType Label
+data Classifier = Classifier ClassifierType LabelType
 
 --
 data ClassifierType = KNN {
@@ -12,18 +12,10 @@ data ClassifierType = KNN {
                }  | SVM
 
 --
+data LabelType = DoubleType | IntType
+
+--
 data Label = LDouble Double | LInt Int deriving Show
-
-instance Ord Label where
-  (LDouble x) `compare` (LDouble y) = x `compare` y
-  (LInt x) `compare` (LInt y) = x `compare` y
-  _ `compare` _ = Prelude.error "No"
-
-instance Eq Label where
-    (==) (LDouble x) (LDouble y) = x == y
-    (==) (LInt x) (LInt y) = x == y
-    (/=) (LDouble x) (LDouble y) = x /= y
-    (/=) (LInt x) (LInt y) = x /= y
 
 --
 type ExampleType = [Double]
@@ -35,16 +27,27 @@ type Norm = [Double] -> Double
 data TrainingKnowledge = KNNKnowledge [ExampleType] [Label] Int | SVMKnowledge deriving Show
 
 --
+instance Ord Label where
+  (LDouble x) `compare` (LDouble y) = x `compare` y
+  (LInt x) `compare` (LInt y) = x `compare` y
+  _ `compare` _ = Prelude.error "No"
+
+instance Eq Label where
+    (==) (LDouble x) (LDouble y) = x == y
+    (==) (LInt x) (LInt y) = x == y
+    (/=) (LDouble x) (LDouble y) = x /= y
+    (/=) (LInt x) (LInt y) = x /= y
+
 train :: Classifier -> [ExampleType] -> [Label] -> TrainingKnowledge
 train (Classifier (KNN _ _)  _) xs ys = KNNKnowledge xs ys (length ys)
 
 --
 classify :: Classifier -> TrainingKnowledge -> ExampleType -> Label
-classify classifier@(Classifier (KNN k norm) (LDouble _)) knowledge@(KNNKnowledge x y len) toClassify = LDouble result
+classify classifier@(Classifier (KNN k norm) DoubleType) knowledge@(KNNKnowledge x y len) toClassify = LDouble result
   where
     result = sum (map labelToDouble $ labelOfClosestNeighbors classifier knowledge toClassify) / fromIntegral len
 
-classify classifier@(Classifier (KNN k norm) (LInt _)) knowledge@(KNNKnowledge x y len) toClassify = LInt result
+classify classifier@(Classifier (KNN k norm) IntType) knowledge@(KNNKnowledge x y len) toClassify = LInt result
   where
     result = snd $ maximumBy (comparing fst) $ zip (map length labelesGroupedByValue) [head x | x <- labelesGroupedByValue]
     labelesGroupedByValue = group (map labelToInt $ labelOfClosestNeighbors classifier knowledge toClassify)
