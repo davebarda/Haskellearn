@@ -6,3 +6,8 @@ let xs = [x1, x2]
 let ys = [y1, y2]
 let x3 = [2, 1]
 let y3 = 1
+
+data LabelType = LDouble | LInt
+func :: LabelType -> Int
+func LDouble = 3
+func Int = 2
