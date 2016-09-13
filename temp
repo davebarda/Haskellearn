@@ -1,13 +1,11 @@
 let x1 = [1, 1]
 let x2 = [1, 0]
-let y1 = 1
-let y2 = 0
+let y1 = (LDouble 1)
+let y2 = (LDouble 0)
 let xs = [x1, x2]
 let ys = [y1, y2]
 let x3 = [2, 1]
-let y3 = 1
+let y3 = (LDouble 1)
 
-data LabelType = LDouble | LInt
-func :: LabelType -> Int
-func LDouble = 3
-func Int = 2
+let know = train (Classifier (KNN 2 (lNorm 2)) DoubleType) xs ys
+classify (Classifier (KNN 2 (lNorm 2)) DoubleType) know x3

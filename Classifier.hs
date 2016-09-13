@@ -8,11 +8,10 @@ data Classifier = Classifier ClassifierType LabelType
 data ClassifierType = KNN {
                 k :: Int,
                 norm :: Norm
-                -- , loss :: Loss
                }  | SVM
 
 --
-data LabelType = DoubleType | IntType
+data LabelType = DoubleType | IntType deriving Show
 
 --
 data Label = LDouble Double | LInt Int deriving Show
@@ -24,7 +23,10 @@ type ExampleType = [Double]
 type Norm = [Double] -> Double
 
 --
-data TrainingKnowledge = KNNKnowledge [ExampleType] [Label] Int | SVMKnowledge deriving Show
+data Loss = RegressionLoss (Double -> Double-> Double) | ClassificationLoss (Int -> Int -> Int)
+
+--
+data TrainingKnowledge = KNNKnowledge [ExampleType] [Label] Classifier | SVMKnowledge
 
 --
 instance Ord Label where
@@ -39,18 +41,17 @@ instance Eq Label where
     (/=) (LInt x) (LInt y) = x /= y
 
 train :: Classifier -> [ExampleType] -> [Label] -> TrainingKnowledge
-train (Classifier (KNN _ _)  _) xs ys = KNNKnowledge xs ys (length ys)
+train classifier@(Classifier (KNN k norm)  labelType) xs ys = KNNKnowledge xs ys classifier
 
 --
-classify :: Classifier -> TrainingKnowledge -> ExampleType -> Label
-classify classifier@(Classifier (KNN k norm) DoubleType) knowledge@(KNNKnowledge x y len) toClassify = LDouble result
-  where
-    result = sum (map labelToDouble $ labelOfClosestNeighbors classifier knowledge toClassify) / fromIntegral len
+classify :: TrainingKnowledge -> ExampleType -> Label
+classify knowledge@(KNNKnowledge x y classifier@(Classifier (KNN k norm) DoubleType)) toClassify =
+  LDouble (sum (map labelToDouble $ labelOfClosestNeighbors knowledge toClassify) / fromIntegral k)
 
-classify classifier@(Classifier (KNN k norm) IntType) knowledge@(KNNKnowledge x y len) toClassify = LInt result
+classify knowledge@(KNNKnowledge x y classifier@(Classifier (KNN k norm) IntType)) toClassify = LInt result
   where
     result = snd $ maximumBy (comparing fst) $ zip (map length labelesGroupedByValue) [head x | x <- labelesGroupedByValue]
-    labelesGroupedByValue = group (map labelToInt $ labelOfClosestNeighbors classifier knowledge toClassify)
+    labelesGroupedByValue = group (map labelToInt $ labelOfClosestNeighbors knowledge toClassify)
 
 --
 labelToDouble :: Label -> Double
@@ -63,20 +64,20 @@ labelToInt (LInt a) = a
 labelToInt (LDouble a) = Prelude.error "Bad"
 
 --
-labelOfClosestNeighbors :: Classifier -> TrainingKnowledge -> ExampleType -> [Label]
-labelOfClosestNeighbors (Classifier (KNN k norm)  _) (KNNKnowledge x y _) toClassify =
-  snd $ unzip $ take k $ sort $ zip (distanceFromVector norm x toClassify) y
+labelOfClosestNeighbors :: TrainingKnowledge -> ExampleType -> [Label]
+labelOfClosestNeighbors (KNNKnowledge x y (Classifier (KNN k norm) _)) toClassify =
+    snd $ unzip $ take k $ sort $ zip (distanceFromVector norm x toClassify) y
 
 --
-distanceFromVector :: Norm ->  [[Double]] -> [Double] -> [Double]
+distanceFromVector :: Norm -> [[Double]] -> [Double] -> [Double]
 distanceFromVector norm x toClassify = map (norm . zipWith (-) toClassify) x
 
 --
-error :: Classifier -> TrainingKnowledge -> [ExampleType] -> [Label] -> Double
-error classifier@(Classifier (KNN k norm)  label) knowledge xs ys =
+error :: TrainingKnowledge -> [ExampleType] -> [Label] -> Double
+error knowledge@(KNNKnowledge x y classifier@(Classifier (KNN k norm) IntType)) xs ys =
     sum [binaryLoss curY_hat curY | (curY_hat, curY) <- zip y_hat ys] / fromIntegral (length ys)
   where
-    y_hat = map (classify classifier knowledge) xs
+    y_hat = map (classify knowledge) xs
 
 --
 lNorm :: Double -> [Double] -> Double
@@ -84,4 +85,8 @@ lNorm n x = sum (map (** n) x) ** (1 / n)
 
 --
 binaryLoss :: (Eq a) => a -> a -> Double
-binaryLoss x y = if x /= y then 1.0 else 0.0
+binaryLoss x y = if x /= y then 1 else 0
+
+--
+l2Loss :: [Double] -> [Double] -> Double
+l2Loss x y = lNorm 2 (zipWith (-) x y)
