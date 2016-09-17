@@ -1,5 +1,5 @@
-module Classifier(TrainingKnowledge, Classifier(..), ClassifierType(..),
-    train, classify, Classifier.error) where
+module Learner(TrainingKnowledge, Classifier(..), ClassifierType(..),
+    train, classify, Learner.error) where
 
 import Data.List
 import Data.Ord
@@ -18,7 +18,6 @@ data ClassifierType = KNN {
 
 --
 type ExampleType = [Double]
-
 
 --
 data TrainingKnowledge = KNNKnowledge [ExampleType] [Label] Classifier

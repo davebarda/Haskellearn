@@ -1,9 +1,9 @@
 Michael Werman's list
 -----------------------
 lazy evaluation - fold for online classification?
-pattern matching - dictionary receives name of learner and returns functions
-higher order functions - dictionary that returns the learner by string
-new types -
+V pattern matching - classify does a pattern matching on the classifier type
+V higher order functions - norm is a parameter
+V new types -
 derived - derived Show
 lambda functions - V
 functors - implement fmap to classify a list of examples
