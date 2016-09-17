@@ -1,4 +1,4 @@
-module Learner(TrainingKnowledge, LearningParameters(..), LearningParametersType(..),
+module Learner(TrainingKnowledge, LearningParameters(..), LearnerParameters(..),
     train, classify, Learner.error) where
 
 import Data.List
@@ -8,10 +8,10 @@ import Loss
 import VectorUtils
 
 --
-data LearningParameters = LearningParameters LearningParametersType LabelType
+data LearningParameters = LearningParameters LearnerParameters LabelType
 
 --
-data LearningParametersType = KNN {
+data LearnerParameters = KNN {
                 k :: Int,
                 norm :: Norm
                }
