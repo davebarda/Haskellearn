@@ -12,7 +12,7 @@ main = hspec $ do
   let x3 = [2, 1]
 
   describe "Regression" $ do
-    let classifier = Classifier KNN {k = 2, norm = lNorm 2} DoubleType
+    let classifier = LearningParameters KNN {k = 2, norm = lNorm 2} DoubleType
     let knowledge = train classifier [x1, x2] [LDouble 1, LDouble 0]
     let classification = classify knowledge x3
 
@@ -20,7 +20,7 @@ main = hspec $ do
       classification `shouldBe` LDouble 0.5
 
   describe "Classification" $ do
-    let classifier = Classifier KNN {k = 1, norm = lNorm 2} IntType
+    let classifier = LearningParameters KNN {k = 1, norm = lNorm 2} IntType
     let knowledge = train classifier [x1, x2] [LInt 1, LInt 0]
     let classification = classify knowledge x3
 

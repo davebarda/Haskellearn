@@ -13,7 +13,7 @@ monoids - data structure for what was learnt
 
 Our list
 -----------------------
-Class inheritance - Classifier -> Online Learner/Offline Learner
+Class inheritance - Learner -> Online Learner/Offline Learner
 
 KNN + CSV parser:
 https://www.reddit.com/r/haskell/comments/27tcvz/knearest_neighbors_in_haskell_is_elegant_but_slow/
