@@ -1,10 +1,10 @@
 module EllipsoidSpec where
 
+import Label
+import Writer
 import Test.Hspec
 import OnlineLearner
-import Label
 import Data.Matrix
-
 --
 roundKnowledgeToNDigits :: Int -> TrainingKnowledge -> TrainingKnowledge
 roundKnowledgeToNDigits digits (EllipsoidKnowledge d eta a w) = EllipsoidKnowledge d roundedEta roundedA roundedW
@@ -22,21 +22,23 @@ roundAndCompare k1 k2 = roundKnowledgeToNDigits precision k1 `shouldBe` roundKno
 
 --
 main :: IO ()
-main = hspec $ do
-  let initialKnowledge = initKnowledge (EllipsoidParameters 2)
-  let eta = 4 / 3
-  let train1Knowledge = EllipsoidKnowledge 2 eta (fromList 2 2 [4 / 9, 0, 0, 4 / 3]) (fromList 1 2 [1 / 3, 0])
-  let x1 = fromList 2 1 [1, 0]
-  let y1 = LInt 1
+main = do
+    let Writer (initialKnowledge, initLog) = initKnowledge (EllipsoidParameters 2)
+    hspec $ do
+      let eta = 4 / 3
+      let train1Knowledge = EllipsoidKnowledge 2 eta (fromList 2 2 [4 / 9, 0, 0, 4 / 3]) (fromList 1 2 [1 / 3, 0])
+      let x1 = fromList 2 1 [1, 0]
+      let y1 = LInt 1
+      describe "Init tests" $
+        it "Initialization test" $
+          roundAndCompare initialKnowledge (EllipsoidKnowledge 2 eta (identity 2) (zero 1 2))
 
-  describe "Init tests" $
-    it "Initialization test" $
-      roundAndCompare initialKnowledge (EllipsoidKnowledge 2 eta (identity 2) (zero 1 2))
+      describe "Train tests" $
+        it "Train on one example" $
+          roundAndCompare (train initialKnowledge x1 y1) train1Knowledge
 
-  describe "Train tests" $
-    it "Train on one example" $
-      roundAndCompare (train initialKnowledge x1 y1) train1Knowledge
-
-  describe "Batch tests" $
-    it "Train on one example" $
-      roundAndCompare (batch initialKnowledge [x1] [y1]) train1Knowledge
+      describe "Batch tests" $
+        it "Train on one example" $
+          roundAndCompare (batch initialKnowledge [x1] [y1]) train1Knowledge
+    putStrLn "------Done Testing------\nCallStack log:"
+    putStrLn $ fromDiffList initLog
