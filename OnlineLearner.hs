@@ -12,7 +12,9 @@ type Example = Matrix Double
 data LearnerParameters = EllipsoidParameters Int deriving Show
 
 --
-data TrainingKnowledge = EllipsoidKnowledge { dimension :: Int, eta :: Double, a :: Matrix Double, w:: Matrix Double } deriving (Show, Eq)
+data TrainingKnowledge = EllipsoidKnowledge {
+ dimension :: Int, eta :: Double, a :: Matrix Double, w:: Matrix Double
+ } deriving (Show, Eq)
 
 --
 initKnowledge :: LearnerParameters -> Writer (DiffList Char) TrainingKnowledge
@@ -27,7 +29,7 @@ initKnowledge (EllipsoidParameters d) = do
 train :: TrainingKnowledge -> Example -> Label -> Writer (DiffList Char) TrainingKnowledge
 train knowledge@(EllipsoidKnowledge d eta' a' w') example (LInt trueY) = do
   let yhat = labelToInt $ getValFromWriter $ classify knowledge example
-  tell $ toDiffList $ "Called train with EllipsoidKnowledge: " ++ show knowledge ++ ", the prediction " ++ show yhat
+  tell $ toDiffList $ "Called train with: " ++ show knowledge ++ ", the prediction " ++ show yhat
   if yhat == trueY
     then do
       tell $ toDiffList $ " was correct, so the result was: " ++ show knowledge
@@ -48,15 +50,28 @@ train _ _ _ = Prelude.error "Train doesn't support these types"
 classify :: TrainingKnowledge -> Example -> Writer (DiffList Char) Label
 classify knowledge@(EllipsoidKnowledge _ _ _ w') example =  do
   let res = LInt $ round (signum (w'  * example) ! (1, 1))
-  tell $ toDiffList $ "Called classify with EllipsoidKnowledge: " ++ show knowledge ++ " and example: " ++ show example ++ ", the prediction is" ++ show res
+  tell $ toDiffList $ "Called classify with: " ++ show knowledge ++ " and example: " ++
+   show example ++ ", the prediction is" ++ show res ++ "\n"
   return res
 
 --
-batch :: TrainingKnowledge -> [Example] -> [Label] -> TrainingKnowledge
-batch knowledge [] [] = knowledge
+batch :: TrainingKnowledge -> [Example] -> [Label] -> Writer (DiffList Char) TrainingKnowledge
+batch knowledge [] _ = do
+    tell $ toDiffList "Called batch with no examples, nothing to be done\n"
+    return knowledge
+batch knowledge _ [] = do
+    tell $ toDiffList "Called batch with no Labels, nothing to be done\n"
+    return knowledge
 batch knowledge examples@(x:xs) labels@(y:ys) =
-  if correctLength then batch (getValFromWriter (train knowledge x y)) xs ys else errorReturn
+  if correctLength then do
+      let res = getValFromWriter $ batch (getValFromWriter (train knowledge x y)) xs ys
+      tell $ toDiffList $ "Called batch with: " ++ show knowledge ++ ", examples: " ++ show examples
+       ++ "and labels: " ++ show labels ++ " and the result was: "  ++ show res
+      return res
+      else
+          do
+              tell $ toDiffList "Number of examples and labels mismatch\n"
+              errorReturn
   where
     correctLength = length examples == length labels
-    errorReturn = Prelude.error "Examples length mismatch labels length"
-batch _ _ _ = Prelude.error "batch doesn't support such input"
+    errorReturn = Prelude.error "Examples length mismatch labels length\n"

@@ -32,6 +32,8 @@ main = do
 
     let Writer (trainKnowledge, trainLog) = train initialKnowledge x1 y1
 
+    let Writer (batchTrainKnowledge, batchTrainLog) = batch initialKnowledge [x1] [y1]
+
     hspec $ do
       describe "Init tests" $
         it "Initialization test" $
@@ -43,8 +45,7 @@ main = do
 
       describe "Batch tests" $
         it "Train on one example" $
-          roundAndCompare (batch initialKnowledge [x1] [y1]) train1Knowledge
+          roundAndCompare batchTrainKnowledge train1Knowledge
 
     putStrLn "------Done Testing------\nCallStack log:"
-    putStrLn $ fromDiffList initLog
-    putStrLn $ fromDiffList trainLog
+    putStrLn $ fromDiffList $ initLog `mappend` trainLog `mappend` batchTrainLog
