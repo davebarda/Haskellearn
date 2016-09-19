@@ -1,4 +1,4 @@
-module Label(Label(LDouble, LInt), LabelType(DoubleType, IntType), labelToDouble, labelToInt) where
+module Label(Label(..), LabelType(..), labelToDouble, labelToInt) where
 
 --
 data LabelType = DoubleType | IntType deriving Show
