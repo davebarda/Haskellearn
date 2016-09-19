@@ -19,7 +19,7 @@ initKnowledge :: LearnerParameters -> TrainingKnowledge
 initKnowledge (EllipsoidParameters d) = EllipsoidKnowledge d eta a w
   where
     dDouble = fromInteger $ toInteger d
-    eta = dDouble * dDouble / (dDouble * dDouble - 1)
+    eta = dDouble * dDouble / (dDouble * dDouble - 1) :: Double
     a = identity d
     w = zero 1 d
 
@@ -44,10 +44,10 @@ classify (EllipsoidKnowledge _ _ _ w) example = LInt $ round (signum (w  * examp
 
 --
 batch :: TrainingKnowledge -> [Example] -> [Label] -> TrainingKnowledge
-batch knowledge [] _ = knowledge
-batch knowledge _ [] = knowledge
+batch knowledge [] [] = knowledge
 batch knowledge examples@(x:xs) labels@(y:ys) =
   if correctLength then batch (train knowledge x y) xs ys else errorReturn
   where
     correctLength = length examples == length labels
     errorReturn = Prelude.error "Examples length mismatch labels length"
+batch _ _ _ = Prelude.error "batch doesn't support such input"
