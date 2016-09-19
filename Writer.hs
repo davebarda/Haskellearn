@@ -1,4 +1,4 @@
-module Writer (Writer(..)) where
+module Writer (Writer(..), DiffList(..), tell, toDiffList, fromDiffList) where
 import Control.Monad (liftM, ap)
 
 newtype Writer w a = Writer { runWriter :: (a, w) }
@@ -11,10 +11,9 @@ instance (Monoid w) =>  Applicative (Writer w) where
   pure  = return
   (<*>) = ap
 
-
 instance (Monoid w) => Monad (Writer w) where
     return x = Writer (x, mempty)
-    (Writer (x,v)) >>= f = let (Writer (y,v')) = f x in Writer (y, v `mappend` v')
+    (Writer (x, v)) >>= f = let (Writer (y, v')) = f x in Writer (y, v `mappend` v')
 
 
 instance Monoid (DiffList a) where
@@ -25,15 +24,7 @@ tell :: w -> Writer w ()
 tell x = Writer ((), x)
 
 toDiffList :: [a] -> DiffList a
-toDiffList xs = DiffList (xs++)
+toDiffList xs = DiffList (xs ++)
 
 fromDiffList :: DiffList a -> [a]
 fromDiffList (DiffList f) = f []
-
-main :: IO ()
-main = let Writer (c, d) = do
-            a <- Writer (4, "Hello")
-            b <- Writer (5, "Bye")
-            tell "Does it work?"
-            return (a*b)
-            in print d
