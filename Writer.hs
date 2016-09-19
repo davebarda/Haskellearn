@@ -1,4 +1,4 @@
-module Writer (Writer(..), DiffList(..), tell, toDiffList, fromDiffList) where
+module Writer (Writer(..), DiffList(..), tell, toDiffList, fromDiffList, getValFromWriter) where
 import Control.Monad (liftM, ap)
 
 newtype Writer w a = Writer { runWriter :: (a, w) }
@@ -22,6 +22,9 @@ instance Monoid (DiffList a) where
 
 tell :: w -> Writer w ()
 tell x = Writer ((), x)
+
+getValFromWriter :: Writer w a -> a
+getValFromWriter (Writer (a, _)) = a
 
 toDiffList :: [a] -> DiffList a
 toDiffList xs = DiffList (xs ++)
