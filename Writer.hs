@@ -1,5 +1,6 @@
-module Writer (Writer(..), DiffList(..), tell, toDiffList, fromDiffList, getValFromWriter) where
+module Writer (Writer(..), DiffList(..), tell, toDiffList, fromDiffList, getValFromWriter, showIndent) where
 import Control.Monad (liftM, ap)
+import Data.String.Utils
 
 -- Writer data type represents a log writer
 newtype Writer w a = Writer { runWriter :: (a, w) }
@@ -20,11 +21,9 @@ instance (Monoid w) => Monad (Writer w) where
     return x = Writer (x, mempty)
     (Writer (x, v)) >>= f = let (Writer (y, v')) = f x in Writer (y, v `mappend` v')
 
-
 instance Monoid (DiffList a) where
     mempty = DiffList (\xs -> [] ++ xs)
     (DiffList f) `mappend` (DiffList g) = DiffList (f.g)
-
 
 -- A function that is used to create a writer with "dummy" values so a simple text
 -- will be writter to the log.
@@ -42,3 +41,8 @@ toDiffList xs = DiffList (xs ++)
 -- A function that is used to get a standard list from a given diffrent list.
 fromDiffList :: DiffList a -> [a]
 fromDiffList (DiffList f) = f []
+
+-- Adds indentation to the Show instance of the given object
+-- useful to make the logs prettier
+showIndent :: (Show a) => a -> String
+showIndent obj = "\t" ++ replace "\n" "\n\t" (show obj)

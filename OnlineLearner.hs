@@ -5,7 +5,6 @@ import Label
 import Writer
 import Loss
 import Data.Matrix
-import Data.String.Utils
 
 -- Example represents the examples that online learners can receive
 type Example = Matrix Double
@@ -21,10 +20,6 @@ data TrainingKnowledge = EllipsoidKnowledge {
                             a :: Matrix Double,
                             w:: Matrix Double
                           } deriving Eq
-
--- Adds indentation to the Show instance of the given object
-showIndent :: (Show a) => a -> String
-showIndent obj = "\t" ++ replace "\n" "\n\t" (show obj)
 
 instance Show TrainingKnowledge where
   show (EllipsoidKnowledge d eta' a' w') = "EllipsoidKnowledge with parameters: " ++
