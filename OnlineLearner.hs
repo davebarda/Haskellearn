@@ -1,8 +1,9 @@
 module OnlineLearner(TrainingKnowledge(..), LearnerParameters(..),
-    initKnowledge, train, classify, batch) where
+    initKnowledge, train, classify, batch, OnlineLearner.error) where
 
 import Label
 import Writer
+import Loss
 import Data.Matrix
 
 -- Example represents the examples that online learners can receive
@@ -26,17 +27,17 @@ initKnowledge (EllipsoidParameters d) = do
     let dDouble = fromInteger $ toInteger d
     let eta' =  dDouble * dDouble / (dDouble * dDouble - 1) :: Double
     let res = EllipsoidKnowledge d eta' (identity d) (zero 1 d)
-    tell $ toDiffList $ "Called initKnoweledge with dimension: " ++ show d ++ " and the result was: " ++ show res
+    tell $ toDiffList $ "Called initKnoweledge with dimension: " ++ show d ++ " and the result was:\n" ++ show res ++ "\n\n"
     return res
 
 -- Given a knowledge and a labeled example, trains the learner on it
 train :: TrainingKnowledge -> Example -> Label -> Writer (DiffList Char) TrainingKnowledge
 train knowledge@(EllipsoidKnowledge d eta' a' w') example (LInt trueY) = do
   let yhat = labelToInt $ getValFromWriter $ classify knowledge example
-  tell $ toDiffList $ "Called train with: " ++ show knowledge ++ ", the prediction " ++ show yhat
+  tell $ toDiffList $ "Called train with:\n" ++ show knowledge ++ ", the prediction: " ++ show yhat
   if yhat == trueY
     then do
-      tell $ toDiffList $ " was correct, so the result was: " ++ show knowledge
+      tell $ toDiffList $ " was correct, so the result was:\n" ++ show knowledge ++ "\n\n"
       return knowledge
     else do
       let ax = a' * example
@@ -45,7 +46,7 @@ train knowledge@(EllipsoidKnowledge d eta' a' w') example (LInt trueY) = do
       let newW = w' + scaleMatrix (fromIntegral trueY / ((dDouble + 1) * sqrt xax)) (transpose ax)
       let newA = scaleMatrix eta' (a' - scaleMatrix (2 / ((dDouble + 1) * xax))  ax * transpose ax)
       let newKnowledge = EllipsoidKnowledge d eta' newA newW
-      tell $ toDiffList $ " was wrong, so the result was: " ++ show newKnowledge
+      tell $ toDiffList $ " was wrong, so the result was:\n" ++ show newKnowledge ++ "\n\n"
       return newKnowledge
 
 train _ _ _ = Prelude.error "Train doesn't support these types"
@@ -54,27 +55,37 @@ train _ _ _ = Prelude.error "Train doesn't support these types"
 classify :: TrainingKnowledge -> Example -> Writer (DiffList Char) Label
 classify knowledge@(EllipsoidKnowledge _ _ _ w') example =  do
   let res = LInt $ round (signum (w'  * example) ! (1, 1))
-  tell $ toDiffList $ "Called classify with: " ++ show knowledge ++ " and example: " ++
-   show example ++ ", the prediction is" ++ show res ++ "\n"
+  tell $ toDiffList $ "Called classify with:\n" ++ show knowledge ++ " and example: " ++
+   show example ++ ", the prediction is" ++ show res ++ "\n\n"
   return res
 
 -- Performs batch training on a batch of labeled examples
 batch :: TrainingKnowledge -> [Example] -> [Label] -> Writer (DiffList Char) TrainingKnowledge
 batch knowledge [] _ = do
-    tell $ toDiffList "Called batch with no examples, nothing to be done\n"
+    tell $ toDiffList "Called batch with no examples, nothing to be done\n\n"
     return knowledge
 batch knowledge _ [] = do
-    tell $ toDiffList "Called batch with no Labels, nothing to be done\n"
+    tell $ toDiffList "Called batch with no labels, nothing to be done\n\n"
     return knowledge
 batch knowledge examples@(x:xs) labels@(y:ys) =
   if correctLength then do
       let res = getValFromWriter $ batch (getValFromWriter (train knowledge x y)) xs ys
-      tell $ toDiffList $ "Called batch with: " ++ show knowledge ++ ", examples: " ++ show examples
-       ++ "and labels: " ++ show labels ++ " and the result was: "  ++ show res
+      tell $ toDiffList $ "Called batch with:\n" ++ show knowledge ++ ", examples: " ++ show examples
+       ++ "and labels: " ++ show labels ++ ", the result was:\n"  ++ show res ++ "\n\n"
       return res
       else do
-        tell $ toDiffList "Number of examples and labels mismatch\n"
+        tell $ toDiffList "Number of examples and labels mismatch\n\n"
         errorReturn
   where
     correctLength = length examples == length labels
-    errorReturn = Prelude.error "Examples length mismatch labels length\n"
+    errorReturn = Prelude.error "Examples length mismatch labels length\n\n"
+
+-- A function that is used to calculate the training error of the classifier
+error :: TrainingKnowledge -> Loss -> [Example] -> [Label] -> Writer (DiffList Char) Double
+error knowledge loss xs ys = do
+    let res = sum [loss curY_hat curY | (curY_hat, curY) <- zip y_hat ys] / fromIntegral (length ys)
+    tell $ toDiffList $ "Called error with:\n" ++ show knowledge ++ ", examples: " ++ show xs
+     ++ "and labels: " ++ show ys ++ ", the error rate was:\n"  ++ show res ++ "\n\n"
+    return res
+  where
+    y_hat = map (getValFromWriter . classify knowledge) xs

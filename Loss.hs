@@ -5,7 +5,6 @@ import Label
 -- The Loss type represents a loss function
 type Loss = Label -> Label -> Double
 
-
 -- binaryLoss simply checks if the labels are identitcal or not
 binaryLoss :: Loss
 binaryLoss x y = if x /= y then 1 else 0

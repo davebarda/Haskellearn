@@ -47,8 +47,7 @@ labelOfClosestNeighbors (KNNKnowledge x y (LearningParameters knn _)) toClassify
 
 -- A function that is used to calculate the training error of the classifier
 error :: TrainingKnowledge -> Loss -> [ExampleType] -> [Label] -> Double
-error knowledge@(KNNKnowledge _ _ (LearningParameters _ IntType)) loss xs ys =
+error knowledge@(KNNKnowledge _ _ (LearningParameters _ _)) loss xs ys =
     sum [loss curY_hat curY | (curY_hat, curY) <- zip y_hat ys] / fromIntegral (length ys)
   where
     y_hat = map (classify knowledge) xs
-error _ _ _ _ = Prelude.error "Training knowledge is not supported"
