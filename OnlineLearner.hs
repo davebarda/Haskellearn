@@ -5,18 +5,22 @@ import Label
 import Writer
 import Data.Matrix
 
---
+-- Example represents the examples that online learners can receive
 type Example = Matrix Double
 
---
+-- LearnerParameters data type represents the specific parameters for each learner.
 data LearnerParameters = EllipsoidParameters Int deriving Show
 
---
+-- TrainingKnowledge data type represents the "knowledge" obtained by the training proccess
+-- to be used when classifying a new example.
 data TrainingKnowledge = EllipsoidKnowledge {
- dimension :: Int, eta :: Double, a :: Matrix Double, w:: Matrix Double
- } deriving (Show, Eq)
+                            dimension :: Int,
+                            eta :: Double,
+                            a :: Matrix Double,
+                            w:: Matrix Double
+                          } deriving (Show, Eq)
 
---
+-- Initializes a "knowledge" to the default values for the specific learner.
 initKnowledge :: LearnerParameters -> Writer (DiffList Char) TrainingKnowledge
 initKnowledge (EllipsoidParameters d) = do
     let dDouble = fromInteger $ toInteger d
@@ -25,7 +29,7 @@ initKnowledge (EllipsoidParameters d) = do
     tell $ toDiffList $ "Called initKnoweledge with dimension: " ++ show d ++ " and the result was: " ++ show res
     return res
 
---
+-- Given a knowledge and a labeled example, trains the learner on it
 train :: TrainingKnowledge -> Example -> Label -> Writer (DiffList Char) TrainingKnowledge
 train knowledge@(EllipsoidKnowledge d eta' a' w') example (LInt trueY) = do
   let yhat = labelToInt $ getValFromWriter $ classify knowledge example
@@ -46,7 +50,7 @@ train knowledge@(EllipsoidKnowledge d eta' a' w') example (LInt trueY) = do
 
 train _ _ _ = Prelude.error "Train doesn't support these types"
 
---
+-- Given an example and a knowledge, classifies the example
 classify :: TrainingKnowledge -> Example -> Writer (DiffList Char) Label
 classify knowledge@(EllipsoidKnowledge _ _ _ w') example =  do
   let res = LInt $ round (signum (w'  * example) ! (1, 1))
@@ -54,7 +58,7 @@ classify knowledge@(EllipsoidKnowledge _ _ _ w') example =  do
    show example ++ ", the prediction is" ++ show res ++ "\n"
   return res
 
---
+-- Performs batch training on a batch of labeled examples
 batch :: TrainingKnowledge -> [Example] -> [Label] -> Writer (DiffList Char) TrainingKnowledge
 batch knowledge [] _ = do
     tell $ toDiffList "Called batch with no examples, nothing to be done\n"
@@ -68,10 +72,9 @@ batch knowledge examples@(x:xs) labels@(y:ys) =
       tell $ toDiffList $ "Called batch with: " ++ show knowledge ++ ", examples: " ++ show examples
        ++ "and labels: " ++ show labels ++ " and the result was: "  ++ show res
       return res
-      else
-          do
-              tell $ toDiffList "Number of examples and labels mismatch\n"
-              errorReturn
+      else do
+        tell $ toDiffList "Number of examples and labels mismatch\n"
+        errorReturn
   where
     correctLength = length examples == length labels
     errorReturn = Prelude.error "Examples length mismatch labels length\n"
