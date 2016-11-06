@@ -1,4 +1,8 @@
-module Writer (Writer(..), DiffList(..), tell, toDiffList, fromDiffList, getValFromWriter, showIndent) where
+-- A module of a writer, which is capable of chaining logs and values in a "monadic" way.
+
+module Writer (Writer(..), DiffList(..), tell, toDiffList, fromDiffList,
+  getValFromWriter, showIndent, takeFromDiffList) where
+
 import Control.Monad (liftM, ap)
 import Data.String.Utils
 
@@ -10,13 +14,21 @@ newtype Writer w a = Writer { runWriter :: (a, w) }
 -- https://wiki.haskell.org/Difference_list
 newtype DiffList a = DiffList { getDiffList :: [a] -> [a] }
 
+-- Every Monad is an Applicative, so that means Monads are also Functors.
+-- liftM is fmap implemented with return and (>>=), and thus allows us to
+-- expose the Functor within the Monad
 instance (Monoid w) => Functor (Writer w) where
   fmap = liftM
 
+-- Since GHC 7.10 Applicative was defined as a superclass of Monad -------------
 instance (Monoid w) =>  Applicative (Writer w) where
   pure  = return
   (<*>) = ap
+--------------------------------------------------------------------------------
 
+-- return should wrap a value x with our Writer monad
+-- (Writer (x, v)) >>= f should activate f on x, getting a value y, append the
+-- new log v' to v, and return Writer (y, v 'mappend' v')
 instance (Monoid w) => Monad (Writer w) where
     return x = Writer (x, mempty)
     (Writer (x, v)) >>= f = let (Writer (y, v')) = f x in Writer (y, v `mappend` v')
@@ -26,11 +38,11 @@ instance Monoid (DiffList a) where
     (DiffList f) `mappend` (DiffList g) = DiffList (f.g)
 
 -- A function that is used to create a writer with "dummy" values so a simple text
--- will be writter to the log.
+-- will be written to the log.
 tell :: w -> Writer w ()
 tell x = Writer ((), x)
 
--- A function that is used to get the resulted value from the writer.
+-- A function that is used to get the result value from the writer.
 getValFromWriter :: Writer w a -> a
 getValFromWriter (Writer (a, _)) = a
 
@@ -46,3 +58,7 @@ fromDiffList (DiffList f) = f []
 -- useful to make the logs prettier
 showIndent :: (Show a) => a -> String
 showIndent obj = "\t" ++ replace "\n" "\n\t" (show obj)
+
+-- Takes the n first items from a DiffList.
+takeFromDiffList :: Int -> DiffList a -> [a]
+takeFromDiffList n diffList = take n (fromDiffList diffList)

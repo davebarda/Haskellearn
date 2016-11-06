@@ -1,3 +1,13 @@
+-- This module represents the possible labels that an example can have.
+-- We chose Double and Int because these are the most basic labels possible -
+-- A double can be used for most regression problems (up to a specific precision or scale).
+-- An int can be used for more classification problems.
+-- We've implemented this module with extensibility in mind.
+-- We implemented the LabelType data in order to be able to check the type of a
+-- specific label - is it a Double, or an Int?
+-- This is important for the KNN leaner that can either function as a regression
+-- learner or a classifier.
+
 module Label(Label(..), LabelType(..), labelToDouble, labelToInt) where
 
 -- LabelType data type represents the type of the labels that can be returned by

@@ -1,5 +1,5 @@
 module EllipsoidSpec where
--- This module that contains tests for the ellipsoid learner
+-- This module contains tests for the ellipsoid learner
 
 import Label
 import Writer
@@ -8,9 +8,10 @@ import Test.Hspec
 import OnlineLearner
 import Data.Matrix
 
--- The Ellipsoid knowledge contains fractions, like eta, a and w. This can cause a problem when comparing two ellipsoids
--- which should contain the same values, but because of a different rounding don't. This function that rounds all the
--- fractions in the knowledge to N digits to enable comparison.
+-- The Ellipsoid knowledge contains fractions, like eta, a and w. This can cause
+-- a problem when comparing two ellipsoids which should contain the same values,
+-- but because of a different rounding appear to be different.
+-- This function rounds all the fractions in the knowledge to N digits to enable comparison.
 roundKnowledgeToNDigits :: Int -> TrainingKnowledge -> TrainingKnowledge
 roundKnowledgeToNDigits digits (EllipsoidKnowledge d eta' a' w') = EllipsoidKnowledge d roundedEta roundedA roundedW
   where
@@ -75,6 +76,7 @@ main = do
       describe "Batch tests" $ do
         it "Train on one example" $
           roundAndCompare batchTrainKnowledge train1Knowledge
+
         it "Train on a lot examples" $ do
           let a' = fromList 2 2 [0.65843621, -0.39506173,
                                 -0.39506173, 0.55308642]

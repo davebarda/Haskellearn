@@ -6,7 +6,7 @@ import Writer
 import Loss
 import Data.Matrix
 
--- Example represents the examples that online learners can receive
+-- Example represents an example that online learners can receive
 type Example = Matrix Double
 
 -- LearnerParameters data type represents the specific parameters for each learner.

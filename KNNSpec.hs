@@ -1,5 +1,5 @@
 module KNNSpec where
--- This module that contains tests for the KNN learner
+-- This module contains tests for the KNN learner
 
 import Test.Hspec
 import Learner

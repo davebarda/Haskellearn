@@ -1,3 +1,6 @@
+-- This module houses the loss functions used in our various learners.
+-- More loss functions can be added to it easily.
+
 module Loss(binaryLoss, quadriaticLoss, Loss) where
 
 import Label

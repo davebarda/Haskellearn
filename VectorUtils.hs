@@ -1,3 +1,5 @@
+-- Various utilities used throughout our project.
+
 module VectorUtils(distanceFromVector, lNorm, Norm) where
 
 -- Norm is a type that represents a norm function

@@ -1,3 +1,5 @@
+-- A module that bundles all the offline learners, at the moment as an example contains
+-- both classification and regression KNN.
 module Learner(TrainingKnowledge, LearningParameters(..), LearnerParameters(..),
     train, classify, Learner.error) where
 
@@ -31,9 +33,14 @@ train classifier@(LearningParameters (KNN _  _)  _) xs ys = KNNKnowledge xs ys c
 
 -- A function that is used to classify a new example using the "knowledge" obtained by the train proccess.
 classify :: TrainingKnowledge -> ExampleType -> Label
+
+-- classify for KNN regression
+-- An average of the labels of the k closest neighbors among the training set
 classify knowledge@(KNNKnowledge _ _ (LearningParameters knn DoubleType)) toClassify =
   LDouble (sum (map labelToDouble $ labelOfClosestNeighbors knowledge toClassify) / fromIntegral (k knn))
 
+-- classify for KNN classification
+-- Returns the label that appears the most among the k closest neighbors of the training set
 classify knowledge@(KNNKnowledge _ _ (LearningParameters _ IntType)) toClassify = LInt result
   where
     result = snd $ maximumBy (comparing fst) $ zip (map length labelesGroupedByValue) labelsValues
