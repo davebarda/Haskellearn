@@ -29,26 +29,36 @@ Functionality Pros
 ------------------
 1) Writing functional code is like writing math!
 
-2) High order functions make the ability to get functions that get as many
+2) High order functions:
+High order functions make the ability to get functions that get as many
 parameters as needed and returns function without complicated function pointers.
 
-3) It was easy to write the tests because each function can be isolated
-as it has its specific arguments and return value without any relation to a
-class or global variables.
+High order functions allow us to make a function more generic, a good
+example is our error function in Learner.hs, that receives as a parameter a
+generic loss function.
+
+3) It was easy to write the tests because in Haskell functions are functions in
+the mathematical sense, meaning that the same result will be given each time we
+use specific arguments.
+Each function can be isolated as it has its specific arguments and return value
+without any relation to a class or global variables.
 
 4) It was easier to debug as the functions are stateless and
 no members or in function variables could be a reason for bugs.
+Meaning, if a problem occurs the cause is the function and that's the place where
+we should look at.
 
 5) Code usually is much shorter.
 
 
 Functionality Cons
 ------------------
-1) Its hard to predict the spaced used in the program (Due to lazyness 4 can
-actually be 2+2 which take more bits to represent).
+1) Its hard to predict the memory space used in a lazy program (due to
+laziness 4 can actually be 2+2 which take more bits to represent, or the
+DiffList which can take more bits to represent than a simple string).
 
-2) Its hard to compare the running time in relation to a given imperative code
-(most of the existing code is written by imperative languages).
-
-3) As imperative programmers its hard to learn and master (due to the differences
+2) As imperative programmers its hard to learn and master (due to the differences
 between imperative and functional languages).
+
+3) Functinoal languages are less widespread, making it difficult to find help.
+We used Haskell's official IRC channel and StackOverflow's Haskell page for help.
