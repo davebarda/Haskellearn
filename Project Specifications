@@ -57,8 +57,14 @@ Functionality Cons
 laziness 4 can actually be 2+2 which take more bits to represent, or the
 DiffList which can take more bits to represent than a simple string).
 
-2) As imperative programmers its hard to learn and master (due to the differences
+2) Functional programmings eschewing of classes, and specifically stateful classes,
+prevents the easy modeling of objects with classes, like databases.
+
+3) Input and output aren't functions in the mathematical sense, thus they are
+inherently "second-class citizens" in functional programming.
+
+4) As imperative programmers its hard to learn and master (due to the differences
 between imperative and functional languages).
 
-3) Functinoal languages are less widespread, making it difficult to find help.
+5) Functional languages are less widespread, making it difficult to find help.
 We used Haskell's official IRC channel and StackOverflow's Haskell page for help.

@@ -19,7 +19,7 @@ data LearnerParameters = KNN {
                 norm :: Norm
                }
 
--- ExampleType data type represents the type of set for examples that are given in the train proccess.
+-- ExampleType data type represents the type of the examples that are given to the learner.
 type ExampleType = [Double]
 
 -- TrainingKnowledge data type represents the "knowledge" obtained by the training proccess
